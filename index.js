@@ -10,7 +10,7 @@ const db = mysql.createConnection({
   host: '127.0.0.1',
   user: 'root',
   password: '123456',
-  database: 'WebRestaurant'
+  database: 'webrestaurant'
 });
 
 db.connect(err => {
@@ -26,12 +26,15 @@ db.connect(err => {
 // Create
 app.post('/menu', (req, res) => {
   const { name, price, img } = req.body;
+  console.log('Received data:', { name, price, img });
+
   const query = 'INSERT INTO Menu (name, price, img) VALUES (?, ?, ?)';
   db.query(query, [name, price, img], (err, results) => {
     if (err) {
-      return res.status(500).send(err);
+      console.error("Error inserting data:", err);
+      return res.status(500).json({ error: "Internal server error" });
     }
-    res.status(201).send({ id: results.insertId, name, price, img });
+    res.json({ msg: "Data inserted successfully" });
   });
 });
 
@@ -39,6 +42,7 @@ app.post('/menu', (req, res) => {
 app.get('/menu', (req, res) => {
   db.query('SELECT * FROM Menu', (err, results) => {
     if (err) {
+      console.error("Error fetching data:", err);
       return res.status(500).send(err);
     }
     res.status(200).send(results);
@@ -49,9 +53,12 @@ app.get('/menu', (req, res) => {
 app.put('/menu/:id', (req, res) => {
   const { id } = req.params;
   const { name, price, img } = req.body;
+  console.log('Updating data:', { id, name, price, img });
+
   const query = 'UPDATE Menu SET name = ?, price = ?, img = ? WHERE id = ?';
   db.query(query, [name, price, img, id], (err, results) => {
     if (err) {
+      console.error("Error updating data:", err);
       return res.status(500).send(err);
     }
     if (results.affectedRows === 0) {
@@ -64,9 +71,12 @@ app.put('/menu/:id', (req, res) => {
 // Delete
 app.delete('/menu/:id', (req, res) => {
   const { id } = req.params;
+  console.log('Deleting data with id:', id);
+
   const query = 'DELETE FROM Menu WHERE id = ?';
   db.query(query, [id], (err, results) => {
     if (err) {
+      console.error("Error deleting data:", err);
       return res.status(500).send(err);
     }
     if (results.affectedRows === 0) {
